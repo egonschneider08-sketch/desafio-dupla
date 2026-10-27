@@ -7,6 +7,7 @@ Esta página separa funcionalidades integradas à `main` de requisitos ainda pen
 - [x] [PR #3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3): documentação, testes iniciais e CI integrados.
 - [x] [PR #5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5): correção da serialização de fabricantes integrada.
 - [x] [PR #10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10): React + TypeScript, CRUD Flask, testes e build aprovados e integrados. Homologação manual em navegador ainda pendente.
+- [x] [PR #12](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/12): cadastro de clientes, login, sessões seguras básicas, CSRF e acesso administrativo por perfil, integrados à `main` com CI aprovada.
 
 ## Próximas tarefas — qualidade e operação
 
@@ -20,7 +21,7 @@ Esta página separa funcionalidades integradas à `main` de requisitos ainda pen
 
 ## Antes da implantação na internet
 
-- [ ] Autenticação e autorização para ações administrativas.
+- [ ] Reforçar autenticação para acesso público: rate limiting, confirmação de e-mail, recuperação de senha, auditoria e avaliação de MFA para administradores.
 - [ ] Políticas de CORS, CSRF/cookies e sessões conforme implantação escolhida.
 - [ ] Migrar esquema de `db.create_all()` para migrações versionadas.
 - [ ] Servidor WSGI, proxy reverso, TLS e variáveis de ambiente seguras.

@@ -10,7 +10,7 @@ O MVP integrado à `main` possui **Flask + SQLAlchemy** no backend e **React + T
 - Node.js 22 e npm.
 - Git.
 
-### 1. Backend — terminal A
+### 1. Preparar o backend e criar administrador (terminal A)
 
 ```powershell
 git clone https://github.com/egonschneider08-sketch/sorvete-flask-api.git
@@ -18,6 +18,7 @@ cd sorvete-flask-api
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-api.txt
+python -m flask --app app create-admin
 python -m flask --app app run --debug
 ```
 
@@ -25,15 +26,9 @@ python -m flask --app app run --debug
 
 **Banco:** SQLite `instance/sorvetes.db` é criado automaticamente. PostgreSQL requer banco existente e driver psycopg. Nunca copie senhas de exemplo para produção.
 
-### 2. Criar administrador (terminal A, uma vez)
+A criação de administrador é um procedimento feito **uma vez, antes de iniciar o Flask**. O comando solicita nome, e-mail e uma senha com pelo menos 12 caracteres. Se não precisar criar administrador novamente, execute apenas o comando de iniciar o Flask. Nunca informe senhas em argumentos de terminal.
 
-\`\`\`powershell
-python -m flask --app app create-admin
-\`\`\`
-
-O comando pergunta nome, e-mail e uma senha com no mínimo 12 caracteres. Administradores só podem ser criados pelo servidor. Não informe senhas em argumentos de terminal.
-
-### 3. Frontend — terminal B
+### 2. Frontend — terminal B
 
 ```powershell
 cd sorvete-flask-api/frontend
@@ -60,7 +55,8 @@ A CI executa testes backend em Python 3.10/3.12, testes frontend e build com Nod
 
 | Recurso | Operações |
 | --- | --- |
-| Saúde | GET /health |\n| Autenticação | GET /auth/session · POST /auth/register · POST /auth/login · POST /auth/logout |
+| Saúde | GET /health |
+| Autenticação | GET /auth/session · POST /auth/register · POST /auth/login · POST /auth/logout |
 | Fabricantes | GET /fabricantes · POST /fabricantes · GET/PATCH/DELETE /fabricantes/{id} |
 | Sorvetes | GET /sorvetes · POST /sorvetes · GET/PATCH/DELETE /sorvetes/{id} |
 
