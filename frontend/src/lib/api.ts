@@ -3,14 +3,36 @@ export type Sorvete = { id: string; nome: string; sabor: string; preco: number; 
 export type SorvetePayload = Pick<Sorvete, 'nome' | 'sabor' | 'preco' | 'fabricante_id'>;
 export type FabricantePayload = Pick<Fabricante, 'nome'>;
 
+export type AuthUser = { id: string; name: string; email: string; role: 'viewer' | 'admin' };
+export type AuthSession = { user: AuthUser | null; csrf_token: string };
+export type LoginPayload = { email: string; password: string };
+export type RegistrationPayload = LoginPayload & { name: string };
+
 const API_BASE = '/api';
+let csrfToken: string | null = null;
+
+function updateCsrf(body: unknown) {
+  if (typeof body === 'object' && body !== null && 'csrf_token' in body && typeof body.csrf_token === 'string') {
+    csrfToken = body.csrf_token;
+  }
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const method = (options?.method || 'GET').toUpperCase();
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method) && csrfToken === null) {
+    await request<AuthSession>('/auth/session');
+  }
   let response: Response;
   try {
     response = await fetch(API_BASE + path, {
       ...options,
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(!['GET', 'HEAD', 'OPTIONS'].includes(method) && csrfToken
+          ? { 'X-CSRF-Token': csrfToken } : {}),
+        ...options?.headers,
+      },
     });
   } catch {
     throw new Error('Não foi possível conectar à API. Verifique se o servidor Flask está ligado.');
@@ -22,10 +44,19 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       ? body.error : 'Não foi possível concluir sua solicitação.';
     throw new Error(message);
   }
+  updateCsrf(body);
   return body as T;
 }
 
 export const api = {
+  auth: {
+    session: () => request<AuthSession>('/auth/session'),
+    register: (data: RegistrationPayload) =>
+      request<AuthSession>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+    login: (data: LoginPayload) =>
+      request<AuthSession>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+    logout: () => request<AuthSession>('/auth/logout', { method: 'POST' }),
+  },
   fabricantes: {
     list: () => request<Fabricante[]>('/fabricantes'),
     create: (data: FabricantePayload) => request<Fabricante>('/fabricantes', { method: 'POST', body: JSON.stringify(data) }),
