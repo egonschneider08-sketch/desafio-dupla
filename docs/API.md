@@ -13,11 +13,11 @@ Base local do Flask: `http://127.0.0.1:5000`. O frontend usa o proxy `/api` em `
 - Nomes e sabores: texto não vazio, máximo 100 caracteres.
 - Preço: inteiro de 0 a 2.147.483.647; booleanos e decimais são inválidos.
 - A interface considera inteiros como reais inteiros temporariamente, sem conversão de dados.
-- API **sem autenticação**, destinada ao ambiente local.
+- O catálogo requer autenticação. **GET** é permitido a clientes e administradores; **POST/PATCH/DELETE** dos produtos exigem administrador.\n- Métodos de escrita requerem header **X-CSRF-Token** da sessão. Veja [Autenticação](AUTH.md).
 
 ## Rotas
 
-| Método | Rota | Sucesso | Outros códigos |
+| Método | Rota | Acesso e resposta |\n| --- | --- | --- |\n| GET | /auth/session | Público; user e csrf_token |\n| POST | /auth/register | Público com CSRF; 201 viewer |\n| POST | /auth/login | Público com CSRF; 200 |\n| POST | /auth/logout | Público com CSRF; 200 |\n\n| Método | Rota | Sucesso | Outros códigos |
 | --- | --- | --- | --- |
 | GET | /health | 200 | Falhas inesperadas não padronizadas |
 | GET | /fabricantes | 200 | - |
@@ -31,7 +31,7 @@ Base local do Flask: `http://127.0.0.1:5000`. O frontend usa o proxy `/api` em `
 | PATCH | /sorvetes/{id} | 200 | 400, 404, 409 |
 | DELETE | /sorvetes/{id} | 204 | 400, 404 |
 
-## Fabricantes
+**Atenção:** GET/POST/PATCH/DELETE dos fabricantes e sorvetes não são públicos. Sem sessão, GET responde 401; usuários viewer recebem 403 ao alterar dados.\n\n## Fabricantes
 
 ### POST /fabricantes
 

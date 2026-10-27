@@ -50,7 +50,7 @@ db.py                     SQLAlchemy extension
 models/book.py            Fabricante e Sorvete (nome legado de arquivo)
 ```
 
-O código preserva a application factory e os endpoints originais. Ainda **não** existe camada separada de serviços: as regras são curtas e ficam nos blueprints para evitar abstração prematura. Introduzir serviços conforme a lógica de negócio crescer.
+O módulo `routes/auth.py` gerencia cadastro, login, sessão e CSRF; `models/user.py` guarda contas com hash de senha e perfis viewer/admin. Os acessos às rotas de catálogo são verificados no Flask antes de executar a lógica HTTP.\n\nO código preserva a application factory e os endpoints originais. Ainda **não** existe camada separada de serviços: as regras são curtas e ficam nos blueprints para evitar abstração prematura. Introduzir serviços conforme a lógica de negócio crescer.
 
 ## Modelo de dados
 
@@ -81,7 +81,7 @@ O uso de `db.create_all()` continua **apenas para o MVP local**. Implementar mig
 
 ## Segurança
 
-O sistema ainda não tem autenticação/autorização. **Não implantar publicamente como painel administrativo.** O desenvolvimento usa proxy para evitar CORS irrestrito; proteger `.env`, excluir bancos locais do Git e desabilitar debug em produção.
+O sistema tem autenticação básica com sessão e autorização por perfil, mas não possui limitação de tentativas nem verificação de e-mail ou recuperação de senha. **Não implantar publicamente sem revisão e medidas adicionais.** O desenvolvimento usa proxy para evitar CORS irrestrito; proteger `.env`, excluir bancos locais do Git e desabilitar debug em produção.
 
 ## Qualidade e trade-offs
 

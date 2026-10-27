@@ -5,17 +5,9 @@ from app import create_app
 from db import db
 
 
-@pytest.fixture
-def client(tmp_path):
-    app = create_app({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'crud.db'}",
-    })
-    with app.test_client() as web:
-        yield web
-    with app.app_context():
-        db.session.remove()
-        db.drop_all()
+@pytest.fixture()
+def client(admin_client):
+    return admin_client
 
 
 def manufacturer(client, name="Gelados da Serra"):

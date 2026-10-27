@@ -8,17 +8,8 @@ from db import db
 
 
 @pytest.fixture()
-def client(tmp_path):
-    # The app factory accepts overrides; use a separate database per test.
-    app = create_app({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'test.db'}",
-    })
-    with app.test_client() as test_client:
-        yield test_client
-    with app.app_context():
-        db.session.remove()
-        db.drop_all()
+def client(admin_client):
+    return admin_client
 
 
 def test_health(client):
