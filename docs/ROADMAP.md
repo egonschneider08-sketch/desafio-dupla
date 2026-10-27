@@ -1,16 +1,16 @@
 # Roadmap — Sorvetes
 
-Esta página separa entregas implementadas em branches de requisitos ainda planejados. **Integração à main e deploy não foram realizados.**
+Esta página separa funcionalidades integradas à `main` de requisitos ainda pendentes. **O MVP local foi integrado e testado, mas não foi implantado publicamente.**
 
-## Implementado em revisão
+## Integrado na main (CI aprovada)
 
-- [x] [PR #3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3): documentação, testes iniciais e CI; checks aprovados.
-- [x] [PR #5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5): correção da serialização de fabricantes; checks aprovados.
-- [x] [PR #10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10): React + TypeScript, CRUD Flask, testes e build aprovados. Ainda sujeito à revisão e homologação manual.
+- [x] [PR #3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3): documentação, testes iniciais e CI integrados.
+- [x] [PR #5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5): correção da serialização de fabricantes integrada.
+- [x] [PR #10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10): React + TypeScript, CRUD Flask, testes e build aprovados e integrados. Homologação manual em navegador ainda pendente.
 
-## Próximas tarefas — para integração segura
+## Próximas tarefas — qualidade e operação
 
-- [ ] Revisar e integrar PR #3 → #5 → #10.
+- [x] Revisar e integrar PR #3 → #5 → #10.
 - [ ] Validar criação/edição/exclusão no navegador em Windows.
 - [ ] Gerar e versionar `frontend/package-lock.json` em ambiente com acesso ao registry.
 - [ ] Revisar e simplificar o `requirements.txt` legado.
