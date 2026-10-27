@@ -10,6 +10,23 @@ def client(admin_client):
     return admin_client
 
 
+def manufacturer(client, name="Gelados da Serra"):
+    response = client.post("/fabricantes", json={"nome": name})
+    assert response.status_code == 201
+    return response.get_json()["id"]
+
+
+def icecream(client, fabricante_id, **overrides):
+    payload = {
+        "nome": "Picolé", "sabor": "Morango", "preco": 5,
+        "fabricante_id": fabricante_id,
+    }
+    payload.update(overrides)
+    response = client.post("/sorvetes", json=payload)
+    assert response.status_code == 201
+    return response.get_json()["id"]
+
+
 def test_manufacturer_crud(client):
     fid = manufacturer(client)
     assert client.get(f"/fabricantes/{fid}").get_json()["sorvetes"] == []
