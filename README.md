@@ -1,56 +1,45 @@
 # API de sorvetes
 
-API Flask conectada a um banco PostgreSQL. O banco roda em um container Docker
-e mantém os dados em um volume, mesmo depois que o container for parado.
+API Flask para cadastrar e consultar fabricantes e sorvetes. Por padrão, os
+dados ficam em um banco SQLite local; não é necessário instalar ou iniciar o
+Docker.
 
 ## Requisitos
 
-- Docker Desktop com Docker Compose
-- Python 3.10 ou superior para executar a API fora do Docker
+- Python 3.10 ou superior
+- PowerShell no Windows
 
-## Iniciar o banco
+## Executar no Windows
 
-Na raiz do projeto, copie o arquivo de exemplo e inicie o PostgreSQL:
-
-```powershell
-Copy-Item .env.example .env
-docker compose pull db
-docker compose up -d db
-```
-
-O Compose também baixa a imagem automaticamente se ela ainda não estiver
-instalada. Para conferir o estado do banco:
+Abra o PowerShell na pasta do projeto e execute:
 
 ```powershell
-docker compose ps
-docker compose logs db
-```
-
-As configurações locais ficam em `.env`. Os valores de exemplo são apenas para
-desenvolvimento; altere a senha antes de usar em qualquer ambiente compartilhado.
-Se mudar o usuário, a senha, o nome ou a porta do banco, atualize também o
-`DATABASE_URL` para manter a conexão da aplicação alinhada.
-
-## Executar a API
-
-Instale as dependências já declaradas no projeto e inicie o servidor:
-
-```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-flask --app app run --debug
+python -m flask --app app run --debug
 ```
 
-A aplicação fica disponível em `http://127.0.0.1:5000`. Ela cria as tabelas
-necessárias ao iniciar. Se `DATABASE_URL` não estiver definido, usa um SQLite
-local (`instance/sorvetes.db`) para facilitar a execução sem Docker.
+Se o PowerShell bloquear a ativação do ambiente virtual, use o Python dele
+diretamente, sem ativar:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m flask --app app run --debug
+```
+
+A API ficará disponível em `http://127.0.0.1:5000`. Para conferir se iniciou
+corretamente, acesse `http://127.0.0.1:5000/health`; a resposta esperada é:
+
+```json
+{"status": "ok", "database": "connected"}
+```
+
+O SQLite é criado automaticamente em `instance/sorvetes.db` quando a aplicação
+inicia. Se existir um arquivo `.env` com `DATABASE_URL` apontando para outro
+banco, remova ou altere essa configuração para usar o SQLite local.
 
 ## Endpoints
-
-### Verificar a conexão
-
-```http
-GET /health
-```
 
 ### Fabricantes
 
@@ -77,24 +66,12 @@ Content-Type: application/json
 }
 ```
 
-`preco` é um número inteiro não negativo. Cada sorvete precisa estar associado
-a um fabricante existente. As respostas incluem o UUID do registro.
+`preco` deve ser um número inteiro não negativo. Cada sorvete precisa estar
+associado a um fabricante existente.
 
-Exemplo para cadastrar fabricante no PowerShell:
+Exemplo para cadastrar um fabricante no PowerShell:
 
 ```powershell
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:5000/fabricantes `
   -ContentType "application/json" -Body '{"nome":"Gelados da Serra"}'
 ```
-
-## Comandos úteis
-
-```powershell
-docker compose stop db       # parar sem apagar os dados
-docker compose start db      # iniciar novamente
-docker compose down          # remover o container, preservando o volume
-docker compose down -v       # apagar também o volume e todos os dados
-```
-
-Por padrão, o PostgreSQL é publicado na porta `5432`. Ajuste `POSTGRES_PORT`
-no `.env` se essa porta já estiver ocupada.
