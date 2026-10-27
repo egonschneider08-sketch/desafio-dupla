@@ -30,7 +30,7 @@ export default function Dashboard() {
       </section>
       <section className="surface-card quick-actions"><div className="card-head"><div><h3>Acesso rápido</h3><p>O que você deseja fazer?</p></div></div>
         {isAdmin && <Link to="/fabricantes" className="quick-link"><div className="quick-icon purple"><Layers3 size={21}/></div><div><strong>Gerenciar fabricantes</strong><small>Cadastre e edite seus parceiros</small></div><ArrowRight size={18}/></Link>}
-        <Link to="/sorvetes" className="quick-link"><div className="quick-icon green"><IceCreamCone size={21}/></div><div><strong>Gerenciar sorvetes</strong><small>Organize produtos e sabores</small></div><ArrowRight size={18}/></Link>
+        <Link to="/sorvetes" className="quick-link"><div className="quick-icon green"><IceCreamCone size={21}/></div><div><strong>{isAdmin ? 'Gerenciar sorvetes' : 'Explorar sorvetes'}</strong><small>{isAdmin ? 'Organize produtos e sabores' : 'Conheça todos os sabores'}</small></div><ArrowRight size={18}/></Link>
       </section></div>
     </>}
   </div>;

@@ -155,3 +155,22 @@ def test_session_cookie_security_settings(client):
     assert config["SESSION_COOKIE_HTTPONLY"] is True
     assert config["SESSION_COOKIE_SAMESITE"] == "Lax"
     assert "SECRET_KEY" in config
+
+def test_production_requires_persistent_secret(monkeypatch):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="SECRET_KEY"):
+        create_app()
+
+
+def test_production_uses_secure_session_cookie(monkeypatch, tmp_path):
+    monkeypatch.setenv("APP_ENV", "production")
+    monkeypatch.setenv("SECRET_KEY", "fixture-persistent-secret-not-for-real-use")
+    app = create_app({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'secure.db'}",
+    })
+    assert app.config["SESSION_COOKIE_SECURE"] is True
+    with app.app_context():
+        db.session.remove()
+        db.drop_all()
