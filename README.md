@@ -8,14 +8,15 @@
 ![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.12-3776AB?logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-149ECA?logo=react&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-REST%20API-1b2737?logo=flask&logoColor=white)
-![MVP](https://img.shields.io/badge/Status-MVP%20local%20validado-90cdb9)
+![MVP](https://img.shields.io/badge/Status-MVP%20testado%20em%20CI-90cdb9)
 
 ## O que é
 
 O Sorvetes é uma aplicação web para organizar um catálogo de fabricantes e seus sorvetes. Foi desenvolvido como projeto de engenharia de software e portfólio, com preocupação em testes, qualidade, documentação e evolução.
 
 **Funcionalidades disponíveis:**
-- Cadastro e login com perfis de cliente (somente leitura) e administrador (gestão).\n- Dashboard com indicadores reais de fabricantes, produtos e sabores.
+- Cadastro e login com perfis de cliente (somente leitura) e administrador (gestão).
+- Dashboard com indicadores reais de fabricantes, produtos e sabores.
 - CRUD de fabricantes e sorvetes.
 - Busca por nome e filtro de sorvetes por fabricante.
 - Formulários com validação, erros, carregamento e confirmação de exclusão.
@@ -43,26 +44,21 @@ git clone https://github.com/egonschneider08-sketch/sorvete-flask-api.git
 cd sorvete-flask-api
 ```
 
-### 2. Iniciar o backend (terminal A)
+### 2. Preparar o backend e criar o administrador (terminal A)
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-api.txt
+python -m flask --app app create-admin
 python -m flask --app app run --debug
 ```
 
 API: **http://127.0.0.1:5000/health**.
 
-### 3. Criar conta administrativa (terminal A, uma vez)
+O comando `create-admin` é interativo e deve ser executado **antes** de iniciar o servidor. Ele solicita nome, e-mail e senha; contas públicas são exclusivamente de leitura. Se já existe administrador, não repita esse passo.
 
-\`\`\`powershell
-python -m flask --app app create-admin
-\`\`\`
-
-O comando solicita nome, e-mail e senha (não informe a senha em argumentos de terminal). Contas criadas pelo formulário público têm permissão **somente de leitura**.
-
-### 4. Iniciar o frontend (terminal B)
+### 3. Iniciar o frontend (terminal B)
 
 ```powershell
 cd frontend
@@ -99,7 +95,9 @@ A CI executa testes em Python 3.10 e 3.12, além dos testes e build Node 22.
 
 | Método | Endpoint | Descrição |
 | --- | --- | --- |
-| GET | /health | Verificação de conexão (pública) |\n| GET | /auth/session | Consulta de sessão e token CSRF |\n| POST | /auth/register, /auth/login, /auth/logout | Cadastro, login e saída |
+| GET | /health | Verificação de conexão (pública) |
+| GET | /auth/session | Consulta de sessão e token CSRF |
+| POST | /auth/register, /auth/login, /auth/logout | Cadastro, login e saída |
 | GET, POST | /fabricantes | Listagem e cadastro |
 | GET, PATCH, DELETE | /fabricantes/{id} | Consulta, edição e exclusão |
 | GET, POST | /sorvetes | Listagem, filtros e cadastro |
@@ -122,7 +120,8 @@ docs/                       # API, arquitetura, guia de execução, roadmap
 
 ## Documentação
 
-- [Guia completo de instalação](docs/SETUP_FULLSTACK.md)\n- [Cadastro, login e perfis](docs/AUTH.md)
+- [Guia completo de instalação](docs/SETUP_FULLSTACK.md)
+- [Cadastro, login e perfis](docs/AUTH.md)
 - [Arquitetura e decisões](docs/ARCHITECTURE.md)
 - [Contrato da API](docs/API.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -135,4 +134,4 @@ A API possui autenticação inicial com sessão e perfis, ainda sem limitações
 
 ## Fluxo de contribuição
 
-Abra uma issue, crie branch curta, adicione testes, atualize documentação e faça Pull Request. Os PRs [#3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3), [#5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5) e [#10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10) foram revisados, tiveram testes de CI aprovados e foram integrados à `main`. A implantação pública continua fora do escopo por falta de autenticação e hardening.
+Abra uma issue, crie branch curta, adicione testes, atualize documentação e faça Pull Request. Os PRs [#3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3), [#5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5) e [#10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10) foram integrados à `main`. O [PR #12](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/12) também integrou cadastro, login e permissões. A implantação pública continua fora do escopo por faltar rate limiting, verificação de e-mail, recuperação de senha, auditoria e outros controles de segurança.
