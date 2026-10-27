@@ -25,7 +25,15 @@ python -m flask --app app run --debug
 
 **Banco:** SQLite `instance/sorvetes.db` é criado automaticamente. PostgreSQL requer banco existente e driver psycopg. Nunca copie senhas de exemplo para produção.
 
-### 2. Frontend — terminal B
+### 2. Criar administrador (terminal A, uma vez)
+
+\`\`\`powershell
+python -m flask --app app create-admin
+\`\`\`
+
+O comando pergunta nome, e-mail e uma senha com no mínimo 12 caracteres. Administradores só podem ser criados pelo servidor. Não informe senhas em argumentos de terminal.
+
+### 3. Frontend — terminal B
 
 ```powershell
 cd sorvete-flask-api/frontend
@@ -33,7 +41,7 @@ npm install
 npm run dev
 ```
 
-Abra **http://127.0.0.1:5173**. Recarregue a página se o Flask tiver sido iniciado depois do Vite.
+Abra **http://127.0.0.1:5173/cadastro** para criar uma conta de cliente ou **/entrar** para usar a conta admin. Recarregue a página se o Flask tiver sido iniciado depois do Vite.
 
 ### 3. Testes e build
 
@@ -52,7 +60,7 @@ A CI executa testes backend em Python 3.10/3.12, testes frontend e build com Nod
 
 | Recurso | Operações |
 | --- | --- |
-| Saúde | GET /health |
+| Saúde | GET /health |\n| Autenticação | GET /auth/session · POST /auth/register · POST /auth/login · POST /auth/logout |
 | Fabricantes | GET /fabricantes · POST /fabricantes · GET/PATCH/DELETE /fabricantes/{id} |
 | Sorvetes | GET /sorvetes · POST /sorvetes · GET/PATCH/DELETE /sorvetes/{id} |
 
@@ -66,7 +74,7 @@ A API preexistente armazenava `preco` como inteiro sem especificação formal. P
 
 ## Segurança
 
-- A API atual não tem autenticação. O painel é para **desenvolvimento local**; não publique endpoints administrativos sem controle de acesso.
+- A API possui autenticação de sessão (clientes viewer e admins), mas **não está pronta para publicação pública** sem limite de tentativas, verificação de e-mail, recuperação de senha, auditoria e revisão de segurança. Consulte [autenticação e perfis](AUTH.md).
 - CORS não é aberto: Vite usa proxy local e futuras implantações devem configurar roteamento de mesma origem.
 - O servidor `flask --debug` não é um servidor de produção.
 - `.env`, bancos locais e segredos não devem ser versionados.

@@ -14,15 +14,15 @@
 
 O Sorvetes é uma aplicação web para organizar um catálogo de fabricantes e seus sorvetes. Foi desenvolvido como projeto de engenharia de software e portfólio, com preocupação em testes, qualidade, documentação e evolução.
 
-**Funcionalidades disponíveis nesta branch:**
-- Dashboard com indicadores reais de fabricantes, produtos e sabores.
+**Funcionalidades disponíveis:**
+- Cadastro e login com perfis de cliente (somente leitura) e administrador (gestão).\n- Dashboard com indicadores reais de fabricantes, produtos e sabores.
 - CRUD de fabricantes e sorvetes.
 - Busca por nome e filtro de sorvetes por fabricante.
 - Formulários com validação, erros, carregamento e confirmação de exclusão.
 - Regras de integridade: não excluir fabricante com produtos associados.
 - Testes automáticos de backend/frontend e build verificado no GitHub Actions.
 
-**Escopo:** MVP para desenvolvimento local. Não há autenticação; **não exponha o painel na internet sem controles de acesso**.
+**Escopo:** MVP para desenvolvimento local. A autenticação e as permissões estão implementadas, mas ainda faltam controle de tentativas, verificação de e-mail, recuperação de senha e revisão de segurança antes de uma publicação pública.
 
 ## Tecnologias
 
@@ -54,7 +54,15 @@ python -m flask --app app run --debug
 
 API: **http://127.0.0.1:5000/health**.
 
-### 3. Iniciar o frontend (terminal B)
+### 3. Criar conta administrativa (terminal A, uma vez)
+
+\`\`\`powershell
+python -m flask --app app create-admin
+\`\`\`
+
+O comando solicita nome, e-mail e senha (não informe a senha em argumentos de terminal). Contas criadas pelo formulário público têm permissão **somente de leitura**.
+
+### 4. Iniciar o frontend (terminal B)
 
 ```powershell
 cd frontend
@@ -62,7 +70,7 @@ npm install
 npm run dev
 ```
 
-Aplicação: **http://127.0.0.1:5173**.
+Aplicação: **http://127.0.0.1:5173**. Abra **/cadastro** para criar conta de cliente ou **/entrar** para utilizar uma conta existente.
 
 O Vite encaminha `/api` para Flask na porta 5000, sem precisar abrir CORS para qualquer origem.
 
@@ -80,17 +88,24 @@ npm run build
 
 A CI executa testes em Python 3.10 e 3.12, além dos testes e build Node 22.
 
+## Acesso e permissões
+
+- **Cliente:** cria conta, entra, consulta fabricantes e sorvetes. Não pode alterar os dados.
+- **Admin:** conta criada no servidor pela CLI; pode cadastrar, editar e excluir produtos.
+- O Flask exige token CSRF nas requisições de escrita, incluindo login e cadastro; o frontend gerencia o token automaticamente.
+- Consulte [autenticação e segurança](docs/AUTH.md) antes de implantar.
+
 ## Rotas HTTP
 
 | Método | Endpoint | Descrição |
 | --- | --- | --- |
-| GET | /health | Verificação de conexão |
+| GET | /health | Verificação de conexão (pública) |\n| GET | /auth/session | Consulta de sessão e token CSRF |\n| POST | /auth/register, /auth/login, /auth/logout | Cadastro, login e saída |
 | GET, POST | /fabricantes | Listagem e cadastro |
 | GET, PATCH, DELETE | /fabricantes/{id} | Consulta, edição e exclusão |
 | GET, POST | /sorvetes | Listagem, filtros e cadastro |
 | GET, PATCH, DELETE | /sorvetes/{id} | Consulta, edição e exclusão |
 
-Detalhes, campos e exemplos: [Referência da API](docs/API.md).
+Todas as rotas de catálogo exigem login; apenas administradores podem modificar os dados. Detalhes: [Referência da API](docs/API.md) e [Autenticação](docs/AUTH.md).
 
 ## Estrutura
 
@@ -107,7 +122,7 @@ docs/                       # API, arquitetura, guia de execução, roadmap
 
 ## Documentação
 
-- [Guia completo de instalação](docs/SETUP_FULLSTACK.md)
+- [Guia completo de instalação](docs/SETUP_FULLSTACK.md)\n- [Cadastro, login e perfis](docs/AUTH.md)
 - [Arquitetura e decisões](docs/ARCHITECTURE.md)
 - [Contrato da API](docs/API.md)
 - [Roadmap](docs/ROADMAP.md)
@@ -116,7 +131,7 @@ docs/                       # API, arquitetura, guia de execução, roadmap
 
 ## Limitações atuais
 
-A API foi desenvolvida para uso local sem autenticação. O campo `preco` é inteiro; esta interface exibe seu valor em reais inteiros para evitar modificar dados legados, mas a convenção precisa ser confirmada para uso com preços reais. O código mantém `db.create_all()` até uma estratégia de migrações ser implantada. A lista original `requirements.txt` é um snapshot de dependências legadas; utilize `requirements-api.txt` para a API e `requirements-dev.txt` para testes. A hospedagem em produção e o lockfile de dependências frontend estão no roadmap.
+A API possui autenticação inicial com sessão e perfis, ainda sem limitações de tentativas, confirmação de e-mail ou recuperação de senha. O campo `preco` é inteiro; esta interface exibe seu valor em reais inteiros para evitar modificar dados legados, mas a convenção precisa ser confirmada para uso com preços reais. O código mantém `db.create_all()` até uma estratégia de migrações ser implantada. A lista original `requirements.txt` é um snapshot de dependências legadas; utilize `requirements-api.txt` para a API e `requirements-dev.txt` para testes. A hospedagem em produção e o lockfile de dependências frontend estão no roadmap.
 
 ## Fluxo de contribuição
 
