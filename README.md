@@ -8,7 +8,7 @@
 ![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.12-3776AB?logo=python&logoColor=white)
 ![React](https://img.shields.io/badge/React-TypeScript-149ECA?logo=react&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-REST%20API-1b2737?logo=flask&logoColor=white)
-![MVP](https://img.shields.io/badge/Status-MVP%20em%20revis%C3%A3o-90cdb9)
+![MVP](https://img.shields.io/badge/Status-MVP%20local%20validado-90cdb9)
 
 ## O que é
 
@@ -42,8 +42,6 @@ O Sorvetes é uma aplicação web para organizar um catálogo de fabricantes e s
 git clone https://github.com/egonschneider08-sketch/sorvete-flask-api.git
 cd sorvete-flask-api
 ```
-
-> Até a aprovação do PR #10, execute `git switch feat/fullstack-catalog-mvp` após o clone; o conteúdo da `main` ainda não possui o frontend.
 
 ### 2. Iniciar o backend (terminal A)
 
@@ -122,4 +120,4 @@ A API foi desenvolvida para uso local sem autenticação. O campo `preco` é int
 
 ## Fluxo de contribuição
 
-Abra uma issue, crie branch curta, adicione testes, atualize documentação e faça Pull Request. Para preservar a sequência de revisões, integrar **PR #3 → PR #5 → PR #10** antes de publicar o MVP.
+Abra uma issue, crie branch curta, adicione testes, atualize documentação e faça Pull Request. Os PRs [#3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3), [#5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5) e [#10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10) foram revisados, tiveram testes de CI aprovados e foram integrados à `main`. A implantação pública continua fora do escopo por falta de autenticação e hardening.

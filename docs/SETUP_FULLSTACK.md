@@ -2,7 +2,7 @@
 
 ## Visão geral
 
-O MVP possui **Flask + SQLAlchemy** no backend e **React + TypeScript + Vite** no frontend. Em desenvolvimento são dois processos, com proxy Vite: chamadas do navegador para `/api/...` são encaminhadas a `http://127.0.0.1:5000/...`. Assim, o browser usa **mesma origem** (porta 5173) e não é necessário abrir CORS permissivo.
+O MVP integrado à `main` possui **Flask + SQLAlchemy** no backend e **React + TypeScript + Vite** no frontend. Em desenvolvimento são dois processos, com proxy Vite: chamadas do navegador para `/api/...` são encaminhadas a `http://127.0.0.1:5000/...`. Assim, o browser usa **mesma origem** (porta 5173) e não é necessário abrir CORS permissivo.
 
 ## Pré-requisitos
 

@@ -2,7 +2,7 @@
 
 [README](../README.md) · [Arquitetura](ARCHITECTURE.md) · [Guia de desenvolvimento](SETUP_FULLSTACK.md)
 
-Base local do Flask: `http://127.0.0.1:5000`. O frontend usa o proxy `/api` em `http://127.0.0.1:5173`. Este documento descreve a implementação da branch `feat/fullstack-catalog-mvp`, ainda em revisão.
+Base local do Flask: `http://127.0.0.1:5000`. O frontend usa o proxy `/api` em `http://127.0.0.1:5173`. Este documento descreve os contratos implementados na branch principal `main`, com testes automatizados.
 
 ## Convenções
 
