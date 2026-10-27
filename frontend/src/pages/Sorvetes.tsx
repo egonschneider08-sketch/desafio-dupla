@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '../lib/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -39,6 +40,8 @@ function SorveteForm({ item, fabricantes, onClose, onDone }: { item: Sorvete | n
 }
 
 export default function Sorvetes() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const qc = useQueryClient();
   const fabricantes = useQuery({ queryKey: ['fabricantes'], queryFn: api.fabricantes.list });
   const [term, setTerm] = useState('');
@@ -52,14 +55,14 @@ export default function Sorvetes() {
   const openForm = (item: Sorvete | null) => { setSelected(item); setFormOpen(true); };
   const hasManufacturers = (fabricantes.data?.length ?? 0) > 0;
   return <div className="page-inner">
-    <PageHeading eyebrow="GESTÃO DE PRODUTOS" title="Sorvetes" subtitle="Explore, cadastre e gerencie os sabores do seu catálogo." action={<Button disabled={!hasManufacturers} title={!hasManufacturers ? 'Cadastre um fabricante primeiro' : ''} onClick={() => openForm(null)}><Plus size={18}/> Novo sorvete</Button>}/>
+    <PageHeading eyebrow="GESTÃO DE PRODUTOS" title="Sorvetes" subtitle={isAdmin ? "Explore, cadastre e gerencie os sabores do catálogo." : "Conheça os nossos produtos, sabores e fabricantes."} action={isAdmin ? <Button disabled={!hasManufacturers} title={!hasManufacturers ? 'Cadastre um fabricante primeiro' : ''} onClick={() => openForm(null)}><Plus size={18}/> Novo sorvete</Button> : undefined}/>
     <div className="table-card"><div className="table-top"><div><h2>Catálogo de sorvetes</h2><p>Produtos cadastrados na plataforma</p></div><div className="filters"><label className="search-field"><Search size={18}/><input aria-label="Buscar sorvete" placeholder="Buscar por nome..." value={term} onChange={(event) => setTerm(event.target.value)}/></label><select aria-label="Filtrar fabricante" value={manufacturer} onChange={(event) => setManufacturer(event.target.value)}><option value="">Todos os fabricantes</option>{(fabricantes.data ?? []).map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}</select></div></div>
-      {query.isLoading || fabricantes.isLoading ? <LoadingState/> : query.error ? <ErrorState message={query.error.message}/> : fabricantes.error ? <ErrorState message={fabricantes.error.message}/> : query.data?.length === 0 ? <EmptyState title={term || manufacturer ? 'Nenhum resultado encontrado' : 'O catálogo está vazio'} text={term || manufacturer ? 'Altere os filtros para encontrar outros produtos.' : hasManufacturers ? 'Cadastre seu primeiro sorvete para começar.' : 'Cadastre um fabricante antes de criar um sorvete.'} action={!term && !manufacturer && hasManufacturers && <Button onClick={() => openForm(null)}><Plus size={17}/> Novo sorvete</Button>}/> :
-        <div className="table-scroll"><table><thead><tr><th>PRODUTO</th><th>SABOR</th><th>FABRICANTE</th><th>PREÇO</th><th className="col-actions">AÇÕES</th></tr></thead><tbody>{(query.data ?? []).map((item, index) => <tr key={item.id}><td><div className="table-name"><span className={`letter-avatar tone-${index % 3}`}><IceCreamCone size={18}/></span><strong>{item.nome}</strong></div></td><td><span className="flavor-pill">{item.sabor}</span></td><td>{item.fabricante}</td><td><strong>{formatPrice(item.preco)}</strong></td><td><div className="action-group"><button title="Editar sorvete" aria-label={`Editar ${item.nome}`} onClick={() => openForm(item)}><Pencil size={17}/></button><button title="Excluir sorvete" aria-label={`Excluir ${item.nome}`} onClick={() => setTarget(item)}><Trash2 size={17}/></button></div></td></tr>)}</tbody></table></div>}
+      {query.isLoading || fabricantes.isLoading ? <LoadingState/> : query.error ? <ErrorState message={query.error.message}/> : fabricantes.error ? <ErrorState message={fabricantes.error.message}/> : query.data?.length === 0 ? <EmptyState title={term || manufacturer ? 'Nenhum resultado encontrado' : 'O catálogo está vazio'} text={term || manufacturer ? 'Altere os filtros para encontrar outros produtos.' : hasManufacturers ? 'Cadastre seu primeiro sorvete para começar.' : 'Cadastre um fabricante antes de criar um sorvete.'} action={isAdmin && !term && !manufacturer && hasManufacturers && <Button onClick={() => openForm(null)}><Plus size={17}/> Novo sorvete</Button>}/> :
+        <div className="table-scroll"><table><thead><tr><th>PRODUTO</th><th>SABOR</th><th>FABRICANTE</th><th>PREÇO</th>{isAdmin && <th className="col-actions">AÇÕES</th>}</tr></thead><tbody>{(query.data ?? []).map((item, index) => <tr key={item.id}><td><div className="table-name"><span className={`letter-avatar tone-${index % 3}`}><IceCreamCone size={18}/></span><strong>{item.nome}</strong></div></td><td><span className="flavor-pill">{item.sabor}</span></td><td>{item.fabricante}</td><td><strong>{formatPrice(item.preco)}</strong></td>{isAdmin && <td><div className="action-group"><button title="Editar sorvete" aria-label={`Editar ${item.nome}`} onClick={() => openForm(item)}><Pencil size={17}/></button><button title="Excluir sorvete" aria-label={`Excluir ${item.nome}`} onClick={() => setTarget(item)}><Trash2 size={17}/></button></div></td>}</tr>)}</tbody></table></div>}
       <div className="table-bottom"><span>{query.data?.length ?? 0} produtos encontrados</span><span>Catálogo em tempo real</span></div>
     </div>
-    {formOpen && <SorveteForm key={selected?.id ?? 'new'} item={selected} fabricantes={fabricantes.data ?? []} onClose={() => setFormOpen(false)} onDone={(message) => { setFormOpen(false); setNotice(message); }}/>}
-    {target && <ConfirmDialog title="Excluir sorvete?" message={`Você tem certeza de que deseja excluir “${target.nome}”? Esta ação não pode ser desfeita.`} busy={remove.isPending} onCancel={() => { setTarget(null); remove.reset(); }} onConfirm={() => remove.mutate(target.id)}/>}
+    {isAdmin && formOpen && <SorveteForm key={selected?.id ?? 'new'} item={selected} fabricantes={fabricantes.data ?? []} onClose={() => setFormOpen(false)} onDone={(message) => { setFormOpen(false); setNotice(message); }}/>}
+    {isAdmin && target && <ConfirmDialog title="Excluir sorvete?" message={`Você tem certeza de que deseja excluir “${target.nome}”? Esta ação não pode ser desfeita.`} busy={remove.isPending} onCancel={() => { setTarget(null); remove.reset(); }} onConfirm={() => remove.mutate(target.id)}/>}
     {remove.error && <ErrorState message={remove.error.message}/>}
     {notice && <Notice text={notice} onClose={() => setNotice('')}/>}
   </div>;
