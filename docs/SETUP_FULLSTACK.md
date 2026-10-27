@@ -17,11 +17,11 @@ git clone https://github.com/egonschneider08-sketch/sorvete-flask-api.git
 cd sorvete-flask-api
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-api.txt
 python -m flask --app app run --debug
 ```
 
-**Alternativa:** dependências de produção e testes mínimas no pipeline de CI, pois o `requirements.txt` legado contém bibliotecas extras; sua revisão está no roadmap.
+**Dependências:** `requirements-api.txt` contém o necessário para rodar a API no SQLite. Para rodar pytest, instale `requirements-dev.txt`. O arquivo `requirements.txt` original é um snapshot legado com bibliotecas extras e não é necessário para o MVP.
 
 **Banco:** SQLite `instance/sorvetes.db` é criado automaticamente. PostgreSQL requer banco existente e driver psycopg. Nunca copie senhas de exemplo para produção.
 

@@ -50,7 +50,7 @@ cd sorvete-flask-api
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-api.txt
 python -m flask --app app run --debug
 ```
 
@@ -72,7 +72,7 @@ O Vite encaminha `/api` para Flask na porta 5000, sem precisar abrir CORS para q
 
 ```powershell
 # Na raiz
-python -m pip install pytest
+python -m pip install -r requirements-dev.txt
 python -m pytest -q
 
 # Em frontend/
@@ -118,7 +118,7 @@ docs/                       # API, arquitetura, guia de execução, roadmap
 
 ## Limitações atuais
 
-A API foi desenvolvida para uso local sem autenticação. O campo `preco` é inteiro; esta interface exibe seu valor em reais inteiros para evitar modificar dados legados, mas a convenção precisa ser confirmada para uso com preços reais. O código mantém `db.create_all()` até uma estratégia de migrações ser implantada. A hospedagem em produção e o lockfile de dependências frontend estão no roadmap.
+A API foi desenvolvida para uso local sem autenticação. O campo `preco` é inteiro; esta interface exibe seu valor em reais inteiros para evitar modificar dados legados, mas a convenção precisa ser confirmada para uso com preços reais. O código mantém `db.create_all()` até uma estratégia de migrações ser implantada. A lista original `requirements.txt` é um snapshot de dependências legadas; utilize `requirements-api.txt` para a API e `requirements-dev.txt` para testes. A hospedagem em produção e o lockfile de dependências frontend estão no roadmap.
 
 ## Fluxo de contribuição
 
