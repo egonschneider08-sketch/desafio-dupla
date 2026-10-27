@@ -17,7 +17,7 @@ class Fabricante(db.Model):
         return {
             "id": str(self.id),
             "nome": self.nome,
-            "sorvetes": [sorvete.dict() for sorvete in self.sorvetes],
+            "sorvetes": [sorvete.as_dict() for sorvete in self.sorvetes],
         }
 
 
