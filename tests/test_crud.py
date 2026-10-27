@@ -5,34 +5,9 @@ from app import create_app
 from db import db
 
 
-@pytest.fixture
-def client(tmp_path):
-    app = create_app({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{tmp_path / 'crud.db'}",
-    })
-    with app.test_client() as web:
-        yield web
-    with app.app_context():
-        db.session.remove()
-        db.drop_all()
-
-
-def manufacturer(client, name="Gelados da Serra"):
-    response = client.post("/fabricantes", json={"nome": name})
-    assert response.status_code == 201
-    return response.get_json()["id"]
-
-
-def icecream(client, fabricante_id, **overrides):
-    payload = {
-        "nome": "Picolé", "sabor": "Morango", "preco": 5,
-        "fabricante_id": fabricante_id,
-    }
-    payload.update(overrides)
-    response = client.post("/sorvetes", json=payload)
-    assert response.status_code == 201
-    return response.get_json()["id"]
+@pytest.fixture()
+def client(admin_client):
+    return admin_client
 
 
 def test_manufacturer_crud(client):
