@@ -1,70 +1,94 @@
-# Arquitetura e modelo de dados
+# Arquitetura Full Stack — Sorvetes
 
-[Voltar ao README](../README.md) · [Contrato HTTP](API.md) · [Roadmap](ROADMAP.md)
+[README](../README.md) · [API](API.md) · [Setup](SETUP_FULLSTACK.md)
 
-## Visão geral
-
-A aplicação usa Flask e SQLAlchemy com persistência relacional. Hoje, as rotas, regras de entrada e operações ORM estão em `app.py`; os modelos estão em `models/book.py`.
+## Visão
 
 ```text
-Cliente HTTP
-    │
-    ▼
-Flask / app.py ──► validação de JSON
-    │                  │
-    ▼                  ▼
-db.py / Flask-SQLAlchemy
-    │
-    ▼
-Fabricante e Sorvete (models/book.py)
-    │
-    ▼
-SQLite (instance/sorvetes.db)
+Browser → React + TypeScript / Vite (localhost:5173)
+                       |
+                  HTTP /api/*
+                       |
+                 proxy Vite dev
+                       |
+                Flask (localhost:5000)
+                       |
+             Blueprints e validação
+                       |
+                  SQLAlchemy
+                       |
+                SQLite por padrão
 ```
 
-## Ciclo de inicialização
-
-A função `create_app(test_config=None)` carrega variáveis com `load_dotenv()`, prepara `instance/`, seleciona SQLite por padrão, inicializa SQLAlchemy e Flask-Migrate e chama `db.create_all()`.
-
-A substituição via `DATABASE_URL` é permitida **apenas** para URLs iniciadas com `sqlite`. Portanto, `.env.example` descreve PostgreSQL como intenção ou legado de configuração, não como suporte confirmado.
-
-`db.create_all()` cria tabelas ausentes, mas não substitui migrações versionadas.
-
-## Modelo relacional
+## Frontend
 
 ```text
-fabricantes
-  id         VARCHAR(36) PRIMARY KEY   (UUID v4 como texto)
-  nome       VARCHAR(100) NOT NULL UNIQUE
-      │ 1
-      │
-      │ N
-sorvetes
-  id         VARCHAR(36) PRIMARY KEY   (UUID v4 como texto)
-  nome       VARCHAR(100) NOT NULL
-  sabor      VARCHAR(100) NOT NULL
-  preco      INTEGER NOT NULL
-  fabricante_id VARCHAR(36) NOT NULL REFERENCES fabricantes(id)
+frontend/src/
+├── App.tsx                  Navegação e shell da aplicação
+├── main.tsx                 Providers React Query e Router
+├── components/UI.tsx        Dialog, confirmação, feedback e estados reutilizáveis
+├── lib/api.ts               Cliente HTTP, tipagem e serialização monetária
+├── pages/
+│   ├── Dashboard.tsx        Indicadores reais, atalhos e produtos recentes
+│   ├── Fabricantes.tsx      CRUD e pesquisa de fabricantes
+│   └── Sorvetes.tsx         CRUD, filtros e pesquisa de produtos
+└── styles.css               Tokens e layout responsivo
 ```
 
-O endpoint de criação exige `preco >= 0`; não foi identificada uma restrição SQL explícita de não negatividade. A unidade monetária ainda não está definida.
+O TanStack Query compartilha os dados remotos entre páginas e invalida cache após mutações. React Hook Form e Zod validam a entrada do formulário; o Flask realiza validação independente no servidor. O cliente usa URL relativa `/api`.
 
-## Regras da aplicação
+## Backend
 
-- Fabricantes devem ter nome não vazio; o nome é único no banco.
-- Sorvetes exigem nome, sabor, preço inteiro não negativo e fabricante existente.
-- As listagens ordenam pelo nome.
-- Identificadores são UUIDs criados em Python, armazenados como `String(36)`.
-- O método `Fabricante.dict()` tenta chamar `sorvete.dict()`, mas `Sorvete` expõe `as_dict()`: inconsistência conhecida a corrigir.
+```text
+app.py                    Application Factory, configuração e registro de blueprints
+routes/
+├── health.py             GET /health
+├── fabricantes.py        Rotas de fabricantes
+├── sorvetes.py           Rotas de sorvetes
+└── common.py             UUID, validações e serializadores
+db.py                     SQLAlchemy extension
+models/book.py            Fabricante e Sorvete (nome legado de arquivo)
+```
 
-## Limitações e riscos
+O código preserva a application factory e os endpoints originais. Ainda **não** existe camada separada de serviços: as regras são curtas e ficam nos blueprints para evitar abstração prematura. Introduzir serviços conforme a lógica de negócio crescer.
 
-1. Tratamento de exceções não é uniforme entre `POST /fabricantes` e `POST /sorvetes`.
-2. Algumas mensagens acentuadas aparecem corrompidas no arquivo `app.py`.
-3. Aplicação concentra validação, rotas e serialização em um módulo.
-4. Não há contrato OpenAPI versionado identificado na leitura inicial.
-5. Debug local não deve ser utilizado em produção.
+## Modelo de dados
 
-## Proposta para crescimento
+```text
+fabricantes (1) ─────────────── (N) sorvetes
 
-Adotar blueprints para endpoints, serviços para regras de negócio, schemas de entrada/saída e migrações versionadas, **somente conforme a necessidade**. Manter simplicidade do MVP, evitar abstrações prematuras e registrar decisões arquiteturais no Notion.
+fabricantes:
+  id             String(36), PK, UUID v4
+  nome           String(100), UNIQUE, NOT NULL
+
+sorvetes:
+  id             String(36), PK, UUID v4
+  nome           String(100), NOT NULL
+  sabor          String(100), NOT NULL
+  preco          Integer, NOT NULL
+  fabricante_id  String(36), FK NOT NULL
+```
+
+Regras na API: `preco` inteiro não negativo; excluir fabricante com produtos retorna 409; nomes e sabores até 100 caracteres.
+
+**Nota monetária:** os registros anteriores não definiam unidade; a interface exibe o inteiro como reais inteiros sem converter dados. Revisar a semântica antes de implantar com preços financeiros reais.
+
+## Banco e ambientes
+
+SQLite: padrão `instance/sorvetes.db`, criado na inicialização. `DATABASE_URL` pode apontar para SQLite ou PostgreSQL; URLs incompatíveis geram erro em vez de fallback silencioso. PostgreSQL exige driver `psycopg` e banco de destino. Testes usam SQLite temporário.
+
+O uso de `db.create_all()` continua **apenas para o MVP local**. Implementar migrations versionadas antes de aplicar mudanças de schema em base persistida de produção.
+
+## Segurança
+
+O sistema ainda não tem autenticação/autorização. **Não implantar publicamente como painel administrativo.** O desenvolvimento usa proxy para evitar CORS irrestrito; proteger `.env`, excluir bancos locais do Git e desabilitar debug em produção.
+
+## Qualidade e trade-offs
+
+- Contratos HTTP existentes preservados.
+- Blueprints dividem rotas por recurso.
+- Testes pytest para CRUD, validadores e integridade; Vitest e React Testing Library para frontend.
+- GitHub Actions valida backend Python 3.10/3.12, frontend Node 22.
+- Não existem ainda migrações de schema, login, observabilidade completa nem workflow de implantação.
+
+Decisões: [ADR-004 no Notion](https://app.notion.com/p/406f69f1ed068183965afb7861252fc1).

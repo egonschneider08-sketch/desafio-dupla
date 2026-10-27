@@ -1,79 +1,117 @@
-# Referência da API HTTP
+# Contrato HTTP — Sorvetes
 
-[Voltar ao README](../README.md) · [Arquitetura](ARCHITECTURE.md)
+[README](../README.md) · [Arquitetura](ARCHITECTURE.md) · [Guia de desenvolvimento](SETUP_FULLSTACK.md)
 
-Base local: `http://127.0.0.1:5000`. Endpoints conforme leitura do `app.py`, sem suposição de operações ainda não implementadas.
+Base local do Flask: `http://127.0.0.1:5000`. O frontend usa o proxy `/api` em `http://127.0.0.1:5173`. Este documento descreve a implementação da branch `feat/fullstack-catalog-mvp`, ainda em revisão.
 
-| Método | Caminho | Efeito | Resposta principal |
+## Convenções
+
+- `Content-Type: application/json` nas operações com corpo.
+- Respostas de erro esperadas usam `{"error":"mensagem"}`.
+- IDs são UUID v4 representados como string.
+- Exclusão bem-sucedida devolve **204** sem corpo.
+- Nomes e sabores: texto não vazio, máximo 100 caracteres.
+- Preço: inteiro de 0 a 2.147.483.647; booleanos e decimais são inválidos.
+- A interface considera inteiros como reais inteiros temporariamente, sem conversão de dados.
+- API **sem autenticação**, destinada ao ambiente local.
+
+## Rotas
+
+| Método | Rota | Sucesso | Outros códigos |
 | --- | --- | --- | --- |
-| GET | `/health` | Verifica banco com `SELECT 1` | 200 |
-| GET | `/fabricantes` | Lista ordenada por nome | 200 |
-| POST | `/fabricantes` | Cadastra fabricante | 201 |
-| GET | `/sorvetes` | Lista ordenada por nome | 200 |
-| POST | `/sorvetes` | Cadastra sorvete | 201 |
+| GET | /health | 200 | Falhas inesperadas não padronizadas |
+| GET | /fabricantes | 200 | - |
+| POST | /fabricantes | 201 | 400, 409 |
+| GET | /fabricantes/{id} | 200 | 400, 404 |
+| PATCH | /fabricantes/{id} | 200 | 400, 404, 409 |
+| DELETE | /fabricantes/{id} | 204 | 400, 404, 409 |
+| GET | /sorvetes | 200 | 400 para UUID de filtro inválido |
+| POST | /sorvetes | 201 | 400, 404, 409 |
+| GET | /sorvetes/{id} | 200 | 400, 404 |
+| PATCH | /sorvetes/{id} | 200 | 400, 404, 409 |
+| DELETE | /sorvetes/{id} | 204 | 400, 404 |
 
-## GET /health
+## Fabricantes
 
-```json
-{"status":"ok","database":"connected"}
-```
-
-## GET /fabricantes
-
-Retorna `[]` quando vazio ou uma lista de objetos:
-
-```json
-[{"id":"550e8400-e29b-41d4-a716-446655440000","nome":"Gelados da Serra"}]
-```
-
-## POST /fabricantes
-
-`Content-Type: application/json`
+### POST /fabricantes
 
 ```json
 {"nome":"Gelados da Serra"}
 ```
 
-**201:** retorna `id` e `nome`. **400:** nome inválido ou JSON incorreto. **409:** erro de integridade tratado pela aplicação como fabricante duplicado.
+Retorna 201 com `{"id":"UUID","nome":"Gelados da Serra"}`. Duplicidade de nome: 409.
 
-## GET /sorvetes
+### GET /fabricantes
 
-Resposta de exemplo:
+Retorna lista ordenada pelo nome:
 
 ```json
-[{
+[{"id":"550e8400-e29b-41d4-a716-446655440000","nome":"Gelados da Serra"}]
+```
+
+### GET /fabricantes/{id}
+
+Retorna fabricante e seus produtos associados:
+
+```json
+{"id":"550e8400-e29b-41d4-a716-446655440000","nome":"Gelados da Serra","sorvetes":[]}
+```
+
+### PATCH /fabricantes/{id}
+
+Aceita exclusivamente `{"nome":"Novo nome"}`, devolve fabricante atualizado. Validação de nome: 400; nome em uso: 409.
+
+### DELETE /fabricantes/{id}
+
+204 sem corpo quando sem produtos. Retorna 409 ao tentar excluir fabricante com sorvetes vinculados, para preservar a integridade.
+
+## Sorvetes
+
+### POST /sorvetes
+
+```json
+{"nome":"Picolé","sabor":"Morango","preco":5,"fabricante_id":"550e8400-e29b-41d4-a716-446655440000"}
+```
+
+Resposta 201:
+
+```json
+{
   "id":"2ea2c95d-52ae-4fb0-a413-74e9498c1d0c",
   "nome":"Picolé",
   "sabor":"Morango",
   "preco":5,
   "fabricante_id":"550e8400-e29b-41d4-a716-446655440000",
   "fabricante":"Gelados da Serra"
-}]
-```
-
-## POST /sorvetes
-
-`Content-Type: application/json`
-
-```json
-{
-  "nome":"Picolé",
-  "sabor":"Morango",
-  "preco":5,
-  "fabricante_id":"550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
-**201:** retorna o mesmo formato de objeto de `GET /sorvetes` (não uma lista).
+Fabricante inexistente: 404. Nome, sabor, preço ou UUID inválidos: 400.
 
-**400:** corpo não é objeto JSON; nome/sabor vazios; preço não é inteiro não negativo (booleanos rejeitados); `fabricante_id` não é UUID string válido.
+### GET /sorvetes
 
-**404:** não existe fabricante com o UUID informado.
+Retorna lista no mesmo formato, ordenada por nome. Filtros opcionais:
 
-## Observações contratuais
+| Query param | Ação |
+| --- | --- |
+| `q` | Busca substring sem distinção de maiúsculas/minúsculas em `nome` |
+| `sabor` | Filtra por substring em `sabor` |
+| `fabricante_id` | Filtra por UUID exato de fabricante |
 
-- O campo `preco` ainda não possui unidade monetária documentada no domínio. Não assuma centavos ou reais.
-- Não há autenticação nos endpoints mostrados.
-- Não há endpoints de atualização e exclusão nessa versão.
-- Mensagens exatas de erro podem apresentar problemas de encoding no código atual.
-- Respostas de erro inesperado ainda dependem do comportamento padrão do Flask.
+Exemplo: `GET /sorvetes?q=picolé&fabricante_id=UUID`.
+
+### GET /sorvetes/{id}
+
+Retorna o objeto individual (200) ou 404.
+
+### PATCH /sorvetes/{id}
+
+Aceita um ou mais: `nome`, `sabor`, `preco`, `fabricante_id`. Atualiza apenas os campos informados. Campos desconhecidos, corpo vazio ou valores inválidos: 400. Fabricante de destino inexistente: 404.
+
+### DELETE /sorvetes/{id}
+
+204 sem corpo; 404 se não encontrado.
+
+## Garantias e limites
+
+As rotas anteriores GET/POST de coleções permanecem compatíveis com os contratos iniciais. O servidor de desenvolvimento não oferece controle de acesso ou proteções operacionais para exposição pública. Os testes em `tests/test_api.py`, `tests/test_models.py` e `tests/test_crud.py` validam contratos de regressão e CRUD.

@@ -1,36 +1,39 @@
-# Roadmap e qualidade
+# Roadmap — Sorvetes
 
-**Estado:** proposta de trabalho; tarefas abaixo não representam funcionalidades prontas nem datas compromissadas.
+Esta página separa entregas implementadas em branches de requisitos ainda planejados. **Integração à main e deploy não foram realizados.**
 
-## P0 — Confiabilidade do MVP
+## Implementado em revisão
 
-- [ ] Corrigir divergência entre `Fabricante.dict()` e `Sorvete.as_dict()`.
-- [ ] Revisar codificação UTF-8 das mensagens de erro.
-- [ ] Decidir política de `DATABASE_URL` e alinhar `.env.example`.
-- [ ] Formalizar unidade de `preco` e reforçar integridade no banco.
-- [ ] Expandir cobertura de exceções de persistência e rollback.
-- [ ] Criar testes para validação, UUID, duplicidade, relação e dados inválidos.
+- [x] [PR #3](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/3): documentação, testes iniciais e CI; checks aprovados.
+- [x] [PR #5](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/5): correção da serialização de fabricantes; checks aprovados.
+- [x] [PR #10](https://github.com/egonschneider08-sketch/sorvete-flask-api/pull/10): React + TypeScript, CRUD Flask, testes e build aprovados. Ainda sujeito à revisão e homologação manual.
 
-## P1 — Padrões e automação
+## Próximas tarefas — para integração segura
 
-- [ ] Avaliar `requirements.txt` e remover dependências não usadas após verificação.
-- [ ] Documentar ambiente de execução para produção sem debug.
-- [ ] Padronizar estrutura de erro e serialização.
-- [ ] Adicionar linter e verificação de tipos conforme maturidade do projeto.
-- [ ] Adotar migrations versionadas e revisar `db.create_all()`.
+- [ ] Revisar e integrar PR #3 → #5 → #10.
+- [ ] Validar criação/edição/exclusão no navegador em Windows.
+- [ ] Gerar e versionar `frontend/package-lock.json` em ambiente com acesso ao registry.
+- [ ] Revisar e simplificar o `requirements.txt` legado.
+- [ ] Formalizar unidade monetária e migração de eventual base antiga.
+- [ ] Adicionar teste ponta a ponta em browser real.
+- [ ] Melhorar acessibilidade de diálogos (travar foco, Escape e retorno ao foco original).
 
-## P2 — Produto e escalabilidade
+## Antes da implantação na internet
 
-- [ ] Definir requisitos para operações de atualizar e remover registros.
-- [ ] Adicionar paginação e filtros mediante necessidade real.
-- [ ] Gerar OpenAPI a partir de contrato revisado.
-- [ ] Planejar autenticação/autorização se houver exposição a usuários.
-- [ ] Definir estratégia de deploy, logs, backup e observabilidade.
+- [ ] Autenticação e autorização para ações administrativas.
+- [ ] Políticas de CORS, CSRF/cookies e sessões conforme implantação escolhida.
+- [ ] Migrar esquema de `db.create_all()` para migrações versionadas.
+- [ ] Servidor WSGI, proxy reverso, TLS e variáveis de ambiente seguras.
+- [ ] Logs, health/readiness, backup/restauração e proteção de dados.
+- [ ] Testes de segurança e revisão de dependências.
 
-## Definição de pronto
+## Funcionalidades opcionais futuras
 
-Uma entrega está pronta quando: requisitos e critérios de aceite estão claros; código revisado; testes relevantes executados; documentação atualizada; riscos e efeitos sobre dados avaliados; e CI aprovada.
+- Gestão de estoque e pedidos.
+- Categorias e relatórios.
+- Paginação do catálogo para bases maiores.
+- OpenAPI formal e API versionada se houver integração com terceiros.
 
-## Registro de decisões
+## Regra de entrega
 
-Manter decisões arquiteturais no Notion, com contexto, alternativas, escolha, consequências, data e status. Vincular issues/PRs a cada decisão implementada.
+Mudanças pequenas com código, testes, documentação e evidência da CI. O status "implementado em branch" **não** equivale a homologação de produção.
